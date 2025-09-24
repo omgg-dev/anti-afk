@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<coverage version="1.0" date="2025-08-01_15-37-49" tag="">
+  <assembly name="OMGG.Package.PACKAGE_NAME">
+    <class name="temp_file" coveredlines="0" coverablelines="4" totallines="16" coveredbranches="0" totalbranches="0" />
+  </assembly>
+</coverage>

@@ -1,0 +1,91 @@
+name: Export Unity Package
+
+# OMGG Github Action for automatically building and testing a Unity package.
+# It's a workflow that check the Unity license validity, execute unit test and build the project.
+# The result of the build can be found in the artifacts of the workflow.
+
+on:
+  # Work only when we push on the main branch
+  push:
+    branches:
+      - main
+      - experimental/*
+  workflow_dispatch:
+
+env:
+  # -- Secrets --
+
+  UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }} # The license of Unity, care the expiration date.
+  UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+  UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+
+  # -- Variables --
+
+  # ! The expiration date is 2025-09-23 so when it's expired, the build will fail, and it will need an update of license.
+  # NOTE: When the UNITY_LICENSE will be update, please add the new expiration date here.
+  stopDate: '2025-09-23T16:18:03'
+
+  # Path of the project in the repository.
+  projectPath: 'template-package'
+
+  # The version of Unity to use.
+  # NOTE: Update this version if the company update his environment.
+  unityVersion: '6000.0.25f1'
+
+  # ! If the version of Unity change, know that the docker image may need an update.
+  # You can found other version: https://hub.docker.com/r/unityci/editor/tags
+  dockerImage: 'unityci/editor:windows-6000.0.25f1-windows-il2cpp-3.1.0'
+
+jobs:
+  checkLicense:
+    name: Check Unity License Validity
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fail - No license
+        if: ${{ !startsWith(env.UNITY_LICENSE, '<') }}
+        run: exit 1
+
+      - name: Check license expiration
+        run: |
+          currentDate=$(date -u +"%Y-%m-%dT%H:%M:%S")
+          if [[ "$currentDate" > "${{ env.stopDate }}" ]]; then
+            echo "License expired"
+            exit 1
+          fi
+
+  exportPackage:
+    name: Export Unity Package
+    runs-on: windows-latest
+    needs: checkLicense
+    strategy:
+      fail-fast: false
+      matrix:
+        targetPlatform:
+          # The target platform to build the project for.
+          # Need to add more platform if the project need to be built for more platform.
+          # Example : StandaloneOSX, StandaloneLinux64, WebGL, iOS, Android, etc...
+          - StandaloneWindows64
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - name: Export Unity Package
+        uses: game-ci/unity-builder@v4.2.3
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          projectPath: ${{ env.projectPath }}
+          unityVersion: ${{ env.unityVersion }}
+          targetPlatform: ${{ matrix.targetPlatform }}
+          customParameters: -quit -batchmode -nographics
+          buildMethod: Exporter.ExportPackage
+
+      - name: Upload .unitypackage
+        uses: actions/upload-artifact@v4
+        with:
+          name: UnityPackage
+          path: ${{ env.projectPath }}/ExportedPackages/*.unitypackage

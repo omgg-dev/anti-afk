@@ -1,0 +1,24 @@
+{
+  "summary": {
+    "generatedon": "2025-08-01T13:37:51Z",
+    "parser": "OpenCoverParser",
+    "assemblies": 1,
+    "classes": 1,
+    "files": 1,
+    "coveredlines": 0,
+    "uncoveredlines": 4,
+    "coverablelines": 4,
+    "totallines": 16,
+    "linecoverage": 0,
+    "coveredbranches": 0,
+    "totalbranches": 0,
+    "coveredmethods": 0,
+    "totalmethods": 2,
+    "methodcoverage": 0
+ },
+  "coverage": {
+    "assemblies": [
+      { "name": "OMGG.Package.PACKAGE_NAME", "classes": 1, "coverage": 0, "coveredlines": 0, "coverablelines": 4, "totallines": 16, "branchcoverage": null, "coveredbranches": 0, "totalbranches": 0, "methodcoverage": 0, "coveredmethods": 0, "totalmethods": 2, "classesinassembly": [
+        { "name": "temp_file", "coverage": 0, "coveredlines": 0, "coverablelines": 4, "totallines": 16, "branchcoverage": null, "coveredbranches": 0, "totalbranches": 0, "methodcoverage": 0, "coveredmethods": 0, "totalmethods": 2 } ] } ]
+  }
+}
