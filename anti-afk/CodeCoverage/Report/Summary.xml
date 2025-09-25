@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<CoverageReport scope="Summary">
+  <Summary>
+    <Generatedon>8/1/2025 - 3:37:51 PM</Generatedon>
+    <Parser>OpenCoverParser</Parser>
+    <Assemblies>1</Assemblies>
+    <Classes>1</Classes>
+    <Files>1</Files>
+    <Coveredlines>0</Coveredlines>
+    <Uncoveredlines>4</Uncoveredlines>
+    <Coverablelines>4</Coverablelines>
+    <Totallines>16</Totallines>
+    <Linecoverage>0</Linecoverage>
+    <Coveredbranches>0</Coveredbranches>
+    <Totalbranches>0</Totalbranches>
+    <Coveredmethods>0</Coveredmethods>
+    <Totalmethods>2</Totalmethods>
+    <Methodcoverage>0</Methodcoverage>
+  </Summary>
+  <Coverage>
+    <Assembly name="OMGG.Package.PACKAGE_NAME" classes="1" coverage="0" coveredlines="0" coverablelines="4" totallines="16" branchcoverage="" coveredbranches="0" totalbranches="0" coveredmethods="0" totalmethods="2" methodcoverage="0">
+      <Class name="temp_file" coverage="0" coveredlines="0" coverablelines="4" totallines="16" branchcoverage="" coveredbranches="0" totalbranches="0" coveredmethods="0" totalmethods="2" methodcoverage="0" />
+    </Assembly>
+  </Coverage>
+</CoverageReport>
