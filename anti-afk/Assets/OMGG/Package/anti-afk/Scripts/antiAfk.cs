@@ -1,6 +1,7 @@
+using Sirenix.OdinInspector;
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
-using Sirenix.OdinInspector;
 
 public class AntiAfk : MonoBehaviour
 {
@@ -40,22 +41,50 @@ public class AntiAfk : MonoBehaviour
 
     private float _Timer = 0;
     private float _Countdown = 0;
+    private bool _IsCountingDown = false;
 
     [OnValueChanged("StartCheckingForAfk")]
-    public bool _Toggle = false;
+    private bool _Toggle = false; // Each time _Toggle is turned to true, the anti-AFK start checking for AFK one single time
 
-    private bool _IsCountingDown = false;
+    private Dictionary<int, int> playerAfkStatus = new Dictionary<int, int>();
+    private int _CurrentPlayerId = 0;
 
     #endregion
 
+    /// <summary>
+    /// Initializes the AntiAfk component by starting the AFK checking process.
+    /// </summary>
     void Update()
     {
+        if (!_Toggle)
+            return;
+
         // Check if we get an input then stop both timer and coutdown
         if (Input.anyKeyDown)
         {
             Debug.Log("[AntiAfk] Input detected, stopping timers");
-            StopCheckingForAfk();
+            ResetCheckingForAfk();
         }
+    }
+
+    /// <summary>
+    /// Toggles the AFK (Away From Keyboard) status for the specified player.
+    /// </summary>
+    /// <remarks>If strict mode is enabled and the player's AFK status is not already tracked, the player is
+    /// added to the AFK status list with the maximum allowed AFK turns. The current player ID is updated to the
+    /// specified player and reset to check the status of the player that is currently playing.</remarks>
+    /// <param name="playerId">The unique identifier of the player whose AFK status is being checked.</param>
+    public void ToogleAfk(int playerId)
+    {
+        if (_IsStrict && !playerAfkStatus.ContainsKey(playerId))
+        {
+            playerAfkStatus[playerId] = _MaxAfkTurns;
+        }
+
+        _Toggle = true;
+        _CurrentPlayerId = playerId;
+
+        ResetCheckingForAfk();
     }
 
     private void StartCheckingForAfk()
@@ -83,7 +112,7 @@ public class AntiAfk : MonoBehaviour
         }
     }
 
-    private void StopCheckingForAfk()
+    private void ResetCheckingForAfk()
     {
         CancelInvoke(nameof(UpdateTimer));
         CancelInvoke(nameof(UpdateCountdown));
@@ -118,7 +147,29 @@ public class AntiAfk : MonoBehaviour
 
         if (_IsStrict)
         {
-            Debug.Log("Kick the player");
+            if (!playerAfkStatus.ContainsKey(_CurrentPlayerId))
+                return;
+
+            playerAfkStatus[_CurrentPlayerId]--;
+
+            if (playerAfkStatus[_CurrentPlayerId] > 0)
+            {
+                Debug.Log($"Player {_CurrentPlayerId} is AFK. {playerAfkStatus[_CurrentPlayerId]} turns left before kick.");
+            }
+            else
+            {
+                Debug.Log($"Player {_CurrentPlayerId} is kicked for being AFK too many times.");
+                // Kick the player
+                // Implement your kick logic here
+                // Or create an event to notify listeners that the player need to be kicked
+            }
+        }
+        else
+        {
+            Debug.Log($"Player {_CurrentPlayerId} turn is skipped for being AFK.");
+            // Skip the player's turn
+            // Implement your skip turn logic here
+            // Or create an event to notify listeners that the player need to have his turn skipped
         }
 
         _Toggle = false;
