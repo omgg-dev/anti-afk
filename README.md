@@ -8,10 +8,10 @@
   <img alt="Game Engine Badge" src="https://img.shields.io/badge/Engine-Unity 6-000000?logo=unity&logoColor=white">
   <img alt="Unity Version Badge" src="https://img.shields.io/badge/Unity Version-6000.0.25f1-595959?logo=unity&logoColor=white">
   <img alt="Technologies Badge" src="https://img.shields.io/badge/Tech-Unity%20Fusion%20C%23-blueviolet">
-  <img alt="Code Coverage Badge" src="template-package/CodeCoverage/Report/badge_linecoverage.png">
+  <img alt="Code Coverage Badge" src="anti-afk/CodeCoverage/Report/badge_linecoverage.png">
 
-  <img alt="Workflows Status Badge" src="https://img.shields.io/github/actions/workflow/status/omgg-dev/template-package/package-builder.yml?label=Build&logo=githubactions">
-  <img alt="Commits Badge" src="https://img.shields.io/github/commit-activity/m/omgg-dev/template-package">
+  <img alt="Workflows Status Badge" src="https://img.shields.io/github/actions/workflow/status/omgg-dev/anti-afk/package-builder.yml?label=Build&logo=githubactions">
+  <img alt="Commits Badge" src="https://img.shields.io/github/commit-activity/m/omgg-dev/anti-afk">
 
   <a href="./LICENSE.md">
     <img alt="License" src="https://img.shields.io/badge/License-Custom-orange">
