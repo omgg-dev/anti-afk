@@ -47,6 +47,18 @@ public class CountdownUIExample : MonoBehaviour
         _AntiAfk.OnPlayerWakeUp.AddListener(HandleCountdownInterrupted);
     }
 
+    private void OnDestroy()
+    {
+        if (_AntiAfk != null)
+        {
+            // Unregister from the AntiAfk events to avoid memory leaks
+            _AntiAfk.OnCountdownStarted.RemoveListener(HandleCountdownStarted);
+            _AntiAfk.OnCountdownTick.RemoveListener(HandleCountdownTick);
+            _AntiAfk.OnCountdownEnded.RemoveListener(HandleCountdownEnded);
+            _AntiAfk.OnPlayerWakeUp.RemoveListener(HandleCountdownInterrupted);
+        }
+    }
+
     private void HandleCountdownStarted(int playerId, float countdownDuration)
     {
         if (_ParentContainer != null)
