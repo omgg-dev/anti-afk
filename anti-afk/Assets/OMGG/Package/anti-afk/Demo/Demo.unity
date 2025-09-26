@@ -214,10 +214,10 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 493365995}
+  - {fileID: 624627873}
   - {fileID: 1219809756}
   - {fileID: 2120751928}
   - {fileID: 1585694178}
-  - {fileID: 624627873}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -526,6 +526,9 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   OnPlayerTurnSkipped:
+    m_PersistentCalls:
+      m_Calls: []
+  OnPlayerWakeUp:
     m_PersistentCalls:
       m_Calls: []
 --- !u!114 &860930312

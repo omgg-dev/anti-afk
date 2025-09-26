@@ -1,4 +1,5 @@
 using Sirenix.OdinInspector;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
@@ -37,6 +38,9 @@ public class AntiAfk : MonoBehaviour
 
     private Dictionary<int, int> _PlayerAfkStatus = new Dictionary<int, int>();
     private int _CurrentPlayerId = 0;
+
+    private Coroutine _TimerCoroutine;
+    private Coroutine _CountdownCoroutine;
 
     #endregion
 
@@ -77,17 +81,14 @@ public class AntiAfk : MonoBehaviour
         if (!_Toggle)
             return;
 
-        // Check if we get an input then stop both timer and coutdown
-        if (Input.anyKeyDown)
+        if (Input.anyKeyDown) // Check if we get an input then stop both timer and coutdown
         {
-            Debug.Log("[AntiAfk] Input detected, stopping timers");
+            // Debug.Log("[AntiAfk] Input detected, stopping timers");
             ResetCheckingForAfk();
         }
-
-        // Check if the player move the mouse
-        if (Input.GetAxis("Mouse X") != 0 || Input.GetAxis("Mouse Y") != 0)
+        else if (Input.GetAxis("Mouse X") != 0 || Input.GetAxis("Mouse Y") != 0) // Check if the player move the mouse
         {
-            Debug.Log("[AntiAfk] Mouse movement detected, stopping timers");
+            // Debug.Log("[AntiAfk] Mouse movement detected, stopping timers");
             ResetCheckingForAfk();
         }
     }
@@ -120,27 +121,15 @@ public class AntiAfk : MonoBehaviour
 
         _Timer = 0;
         _IsCountingDown = false;
-        InvokeRepeating(nameof(UpdateTimer), 1f, 1f);
-    }
-
-    private void UpdateTimer()
-    {
-        // Count every secconds 
-        _Timer += 1;
-        Debug.Log($"[AntiAfk] Timer: {_Timer}");
-        // If the timer reach the limit
-        if (_Timer >= _WaitForInputSecs && !_IsCountingDown)
-        {
-            Debug.Log("[AntiAfk] Timer reached the limit");
-            CancelInvoke(nameof(UpdateTimer));
-            StartCountdown();
-        }
+        _TimerCoroutine = StartCoroutine(UpdateTimerCoroutine());
     }
 
     private void ResetCheckingForAfk()
     {
-        CancelInvoke(nameof(UpdateTimer));
-        CancelInvoke(nameof(UpdateCountdown));
+        if (_TimerCoroutine != null)
+            StopCoroutine(_TimerCoroutine);
+        if (_CountdownCoroutine != null)
+            StopCoroutine(_CountdownCoroutine);
 
         OnPlayerWakeUp.Invoke(_CurrentPlayerId);
         StartCheckingForAfk();
@@ -151,26 +140,13 @@ public class AntiAfk : MonoBehaviour
         _IsCountingDown = true;
         _Countdown = _CountdownSecs;
         OnCountdownStarted.Invoke(_CurrentPlayerId, _Countdown);
-        
-        InvokeRepeating(nameof(UpdateCountdown), 1f, 1f);
-    }
 
-    private void UpdateCountdown()
-    {
-        _Countdown--;
-        OnCountdownTick.Invoke(_CurrentPlayerId, _Countdown);
-        
-        if (_Countdown <= 0)
-        {
-            CancelInvoke(nameof(UpdateCountdown));
-            OnCountdownEnded.Invoke(_CurrentPlayerId);
-            HandleAfk();
-        }
+        _CountdownCoroutine = StartCoroutine(UpdateCountdownCoroutine());
     }
 
     private void HandleAfk()
     {
-        Debug.Log("[AntiAfk] Handling AFK");
+        // Debug.Log("[AntiAfk] Handling AFK");
 
         if (_IsStrict) // Try to kick the player
         {
@@ -181,11 +157,11 @@ public class AntiAfk : MonoBehaviour
 
             if (_PlayerAfkStatus[_CurrentPlayerId] > 0)
             {
-                Debug.Log($"Player {_CurrentPlayerId} is AFK. {_PlayerAfkStatus[_CurrentPlayerId]} turns left before kick.");
+                // Debug.Log($"Player {_CurrentPlayerId} is AFK. {_PlayerAfkStatus[_CurrentPlayerId]} turns left before kick.");
             }
             else
             {
-                Debug.Log($"Player {_CurrentPlayerId} is kicked for being AFK too many times.");
+                // Debug.Log($"Player {_CurrentPlayerId} is kicked for being AFK too many times.");
                 // Kick the player
                 // Implement your kick logic here
                 // Or create an event to notify listeners that the player need to be kicked
@@ -195,7 +171,7 @@ public class AntiAfk : MonoBehaviour
         }
         else // Just skip the turn of the player
         {
-            Debug.Log($"Player {_CurrentPlayerId} turn is skipped for being AFK.");
+            // Debug.Log($"Player {_CurrentPlayerId} turn is skipped for being AFK.");
             // Skip the player's turn
             // Implement your skip turn logic here
             // Or create an event to notify listeners that the player need to have his turn skipped
@@ -205,5 +181,39 @@ public class AntiAfk : MonoBehaviour
 
         _Toggle = false;
     }
+    #endregion
+
+    #region Coroutines
+    
+    private IEnumerator UpdateTimerCoroutine()
+    {
+        yield return new WaitForSeconds(1f);
+
+        while (_Timer < _WaitForInputSecs && !_IsCountingDown)
+        {
+            _Timer++;
+            // Debug.Log($"[AntiAfk] Timer: {_Timer}");
+            yield return new WaitForSeconds(1f);
+        }
+
+        // Debug.Log("[AntiAfk] Timer reached the limit");
+        StartCountdown();
+    }
+    
+    private IEnumerator UpdateCountdownCoroutine()
+    {
+        yield return new WaitForSeconds(1f);
+
+        while (_Countdown > 0)
+        {
+            _Countdown--;
+            OnCountdownTick.Invoke(_CurrentPlayerId, _Countdown);
+            yield return new WaitForSeconds(1f);
+        }
+
+        OnCountdownEnded.Invoke(_CurrentPlayerId);
+        HandleAfk();
+    }
+    
     #endregion
 }
