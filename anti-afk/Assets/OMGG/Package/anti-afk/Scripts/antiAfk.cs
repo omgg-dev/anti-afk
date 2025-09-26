@@ -1,7 +1,7 @@
 using Sirenix.OdinInspector;
 using System.Collections.Generic;
-using TMPro;
 using UnityEngine;
+using UnityEngine.Events;
 
 public class AntiAfk : MonoBehaviour
 {
@@ -26,17 +26,6 @@ public class AntiAfk : MonoBehaviour
 
     #endregion
 
-    #region UI
-
-    [Title("UI References")]
-    [Required("A TextMeshPro need to be assigned, otherwise the anti-AFK cannot display the countdown text.")]
-    [SerializeField] private TMP_Text _CountdownText;
-
-    [Required("A Parent Gameobject need to be assigned, otherwise the coutdown will always be displayed or hidden.")]
-    [SerializeField] private GameObject _ParentContainer;
-
-    #endregion
-
     #region Properties
 
     private float _Timer = 0;
@@ -46,8 +35,37 @@ public class AntiAfk : MonoBehaviour
     [OnValueChanged("StartCheckingForAfk")]
     private bool _Toggle = false; // Each time _Toggle is turned to true, the anti-AFK start checking for AFK one single time
 
-    private Dictionary<int, int> playerAfkStatus = new Dictionary<int, int>();
+    private Dictionary<int, int> _PlayerAfkStatus = new Dictionary<int, int>();
     private int _CurrentPlayerId = 0;
+
+    #endregion
+
+    #region Events
+
+    [Title("Anti-AFK Events")]
+    [FoldoutGroup("Events")]
+    [InfoBox("Triggered when the countdown starts. Args: playerId, countdown duration (seconds).")]
+    public UnityEvent<int, float> OnCountdownStarted;
+
+    [FoldoutGroup("Events")]
+    [InfoBox("Triggered every second while the countdown is running. Args: playerId, seconds left.")]
+    public UnityEvent<int, float> OnCountdownTick;
+
+    [FoldoutGroup("Events")]
+    [InfoBox("Triggered when the countdown reaches 0. Args: playerId.")]
+    public UnityEvent<int> OnCountdownEnded;
+
+    [FoldoutGroup("Events")]
+    [InfoBox("Triggered when a player is kicked for being AFK. Args: playerId.")]
+    public UnityEvent<int> OnPlayerKicked;
+
+    [FoldoutGroup("Events")]
+    [InfoBox("Triggered when a player’s turn is skipped due to AFK. Args: playerId.")]
+    public UnityEvent<int> OnPlayerTurnSkipped;
+
+    [FoldoutGroup("Events")]
+    [InfoBox("Triggered when the actual player is not AFK anymore. Args: playerId.")]
+    public UnityEvent<int> OnPlayerWakeUp;
 
     #endregion
 
@@ -65,6 +83,13 @@ public class AntiAfk : MonoBehaviour
             Debug.Log("[AntiAfk] Input detected, stopping timers");
             ResetCheckingForAfk();
         }
+
+        // Check if the player move the mouse
+        if (Input.GetAxis("Mouse X") != 0 || Input.GetAxis("Mouse Y") != 0)
+        {
+            Debug.Log("[AntiAfk] Mouse movement detected, stopping timers");
+            ResetCheckingForAfk();
+        }
     }
 
     /// <summary>
@@ -76,9 +101,9 @@ public class AntiAfk : MonoBehaviour
     /// <param name="playerId">The unique identifier of the player whose AFK status is being checked.</param>
     public void ToogleAfk(int playerId)
     {
-        if (_IsStrict && !playerAfkStatus.ContainsKey(playerId))
+        if (_IsStrict && !_PlayerAfkStatus.ContainsKey(playerId))
         {
-            playerAfkStatus[playerId] = _MaxAfkTurns;
+            _PlayerAfkStatus[playerId] = _MaxAfkTurns;
         }
 
         _Toggle = true;
@@ -87,6 +112,7 @@ public class AntiAfk : MonoBehaviour
         ResetCheckingForAfk();
     }
 
+    #region Private Methods
     private void StartCheckingForAfk()
     {
         if (_Toggle == false)
@@ -94,7 +120,6 @@ public class AntiAfk : MonoBehaviour
 
         _Timer = 0;
         _IsCountingDown = false;
-        _ParentContainer.gameObject.SetActive(false);
         InvokeRepeating(nameof(UpdateTimer), 1f, 1f);
     }
 
@@ -116,27 +141,29 @@ public class AntiAfk : MonoBehaviour
     {
         CancelInvoke(nameof(UpdateTimer));
         CancelInvoke(nameof(UpdateCountdown));
+
+        OnPlayerWakeUp.Invoke(_CurrentPlayerId);
         StartCheckingForAfk();
     }
 
     private void StartCountdown()
     {
         _IsCountingDown = true;
-
         _Countdown = _CountdownSecs;
-        _ParentContainer.gameObject.SetActive(true);
-        _CountdownText.text = $"You will be kicked in {_Countdown} seconds";
+        OnCountdownStarted.Invoke(_CurrentPlayerId, _Countdown);
+        
         InvokeRepeating(nameof(UpdateCountdown), 1f, 1f);
     }
 
     private void UpdateCountdown()
     {
         _Countdown--;
-        _CountdownText.text = $"You will be kicked in {_Countdown} seconds";
+        OnCountdownTick.Invoke(_CurrentPlayerId, _Countdown);
+        
         if (_Countdown <= 0)
         {
             CancelInvoke(nameof(UpdateCountdown));
-            _ParentContainer.gameObject.SetActive(false);
+            OnCountdownEnded.Invoke(_CurrentPlayerId);
             HandleAfk();
         }
     }
@@ -145,16 +172,16 @@ public class AntiAfk : MonoBehaviour
     {
         Debug.Log("[AntiAfk] Handling AFK");
 
-        if (_IsStrict)
+        if (_IsStrict) // Try to kick the player
         {
-            if (!playerAfkStatus.ContainsKey(_CurrentPlayerId))
+            if (!_PlayerAfkStatus.ContainsKey(_CurrentPlayerId))
                 return;
 
-            playerAfkStatus[_CurrentPlayerId]--;
+            _PlayerAfkStatus[_CurrentPlayerId]--;
 
-            if (playerAfkStatus[_CurrentPlayerId] > 0)
+            if (_PlayerAfkStatus[_CurrentPlayerId] > 0)
             {
-                Debug.Log($"Player {_CurrentPlayerId} is AFK. {playerAfkStatus[_CurrentPlayerId]} turns left before kick.");
+                Debug.Log($"Player {_CurrentPlayerId} is AFK. {_PlayerAfkStatus[_CurrentPlayerId]} turns left before kick.");
             }
             else
             {
@@ -162,16 +189,21 @@ public class AntiAfk : MonoBehaviour
                 // Kick the player
                 // Implement your kick logic here
                 // Or create an event to notify listeners that the player need to be kicked
+
+                OnPlayerKicked.Invoke(_CurrentPlayerId);
             }
         }
-        else
+        else // Just skip the turn of the player
         {
             Debug.Log($"Player {_CurrentPlayerId} turn is skipped for being AFK.");
             // Skip the player's turn
             // Implement your skip turn logic here
             // Or create an event to notify listeners that the player need to have his turn skipped
+
+            OnPlayerTurnSkipped.Invoke(_CurrentPlayerId);
         }
 
         _Toggle = false;
     }
+    #endregion
 }

@@ -3,10 +3,10 @@ using UnityEngine;
 public class AntiAfkToogleExample : MonoBehaviour
 {
     public int playerId = 0;
-    public AntiAfk antiAfk;
+    public AntiAfk AntiAfk;
 
     public void ToggleAfk()
     {
-        antiAfk.ToogleAfk(playerId);
+        AntiAfk.ToogleAfk(playerId);
     }
 }
