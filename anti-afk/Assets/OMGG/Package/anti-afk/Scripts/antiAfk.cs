@@ -87,7 +87,7 @@ public class AntiAfk : MonoBehaviour
         _Toggle = true;
         _CurrentPlayerId = playerId;
 
-        Debug.Log($"[AntiAfk] Toggling AFK for player {playerId}");
+        // Debug.Log($"[AntiAfk] Toggling AFK for player {playerId}");
 
         ResetCheckingForAfk();
     }
@@ -140,7 +140,7 @@ public class AntiAfk : MonoBehaviour
             }
             else
             {
-                Debug.Log($"Player {_CurrentPlayerId} is kicked for being AFK too many times.");
+                // Debug.Log($"Player {_CurrentPlayerId} is kicked for being AFK too many times.");
                 // Kick the player
                 // Implement your kick logic here
                 // Or create an event to notify listeners that the player need to be kicked
@@ -150,7 +150,7 @@ public class AntiAfk : MonoBehaviour
         }
         else // Just skip the turn of the player
         {
-            Debug.Log($"Player {_CurrentPlayerId} turn is skipped for being AFK.");
+            // Debug.Log($"Player {_CurrentPlayerId} turn is skipped for being AFK.");
             // Skip the player's turn
             // Implement your skip turn logic here
             // Or create an event to notify listeners that the player need to have his turn skipped
@@ -171,11 +171,11 @@ public class AntiAfk : MonoBehaviour
         while (_Timer < _WaitForInputSecs && !_IsCountingDown)
         {
             _Timer++;
-            Debug.Log($"[AntiAfk] Timer: {_Timer}");
+            // Debug.Log($"[AntiAfk] Timer: {_Timer}");
             yield return new WaitForSeconds(1f);
         }
 
-        Debug.Log("[AntiAfk] Timer reached the limit");
+        // Debug.Log("[AntiAfk] Timer reached the limit");
         StartCountdown();
     }
     
