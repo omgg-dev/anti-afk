@@ -1,6 +1,5 @@
 using TMPro;
 using UnityEngine;
-using Sirenix.OdinInspector;
 
 /// <summary>
 /// This is an example script showing how to use the AntiAfk component to display a countdown UI.
@@ -13,11 +12,9 @@ public class CountdownUIExample : MonoBehaviour
 
     #region UI
 
-    [Title("UI References")]
-    [Required("A TextMeshPro need to be assigned, otherwise the anti-AFK cannot display the countdown text.")]
+    [Header("UI References")]
     [SerializeField] private TMP_Text _CountdownText;
 
-    [Required("A Parent Gameobject need to be assigned, otherwise the coutdown will always be displayed or hidden.")]
     [SerializeField] private GameObject _ParentContainer;
 
     #endregion

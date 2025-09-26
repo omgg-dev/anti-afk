@@ -1,4 +1,3 @@
-using Sirenix.OdinInspector;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -8,21 +7,17 @@ public class AntiAfk : MonoBehaviour
 {
     #region Settings
 
-    [Title("Anti-AFK Settings")]
+    [Header("Anti-AFK Settings")]
     [Tooltip("Time (in seconds) before the anti-AFK is triggered.")]
-    [MinValue(5), MaxValue(600)]
     [SerializeField] private float _WaitForInputSecs = 30;
 
     [Tooltip("Duration (in seconds) of the coutdown before the a turn is skipped.")]
-    [MinValue(5), MaxValue(120)]
     [SerializeField] private float _CountdownSecs = 15;
 
     [Tooltip("Toggle if a player can be kicked or not.")]
     [SerializeField] private bool _IsStrict = true;
 
     [Tooltip("Max number of AFK tolerated before a kick.")]
-    [MinValue(1), MaxValue(10)]
-    [ShowIf(nameof(_IsStrict))]
     [SerializeField] private int _MaxAfkTurns = 3;
 
     #endregion
@@ -33,7 +28,6 @@ public class AntiAfk : MonoBehaviour
     private float _Countdown = 0;
     private bool _IsCountingDown = false;
 
-    [OnValueChanged("StartCheckingForAfk")]
     private bool _Toggle = false; // Each time _Toggle is turned to true, the anti-AFK start checking for AFK one single time
 
     private Dictionary<int, int> _PlayerAfkStatus = new Dictionary<int, int>();
@@ -46,29 +40,12 @@ public class AntiAfk : MonoBehaviour
 
     #region Events
 
-    [Title("Anti-AFK Events")]
-    [FoldoutGroup("Events")]
-    [InfoBox("Triggered when the countdown starts. Args: playerId, countdown duration (seconds).")]
     public UnityEvent<int, float> OnCountdownStarted;
-
-    [FoldoutGroup("Events")]
-    [InfoBox("Triggered every second while the countdown is running. Args: playerId, seconds left.")]
     public UnityEvent<int, float> OnCountdownTick;
 
-    [FoldoutGroup("Events")]
-    [InfoBox("Triggered when the countdown reaches 0. Args: playerId.")]
     public UnityEvent<int> OnCountdownEnded;
-
-    [FoldoutGroup("Events")]
-    [InfoBox("Triggered when a player is kicked for being AFK. Args: playerId.")]
     public UnityEvent<int> OnPlayerKicked;
-
-    [FoldoutGroup("Events")]
-    [InfoBox("Triggered when a player’s turn is skipped due to AFK. Args: playerId.")]
     public UnityEvent<int> OnPlayerTurnSkipped;
-
-    [FoldoutGroup("Events")]
-    [InfoBox("Triggered when the actual player is not AFK anymore. Args: playerId.")]
     public UnityEvent<int> OnPlayerWakeUp;
 
     #endregion
@@ -109,6 +86,8 @@ public class AntiAfk : MonoBehaviour
 
         _Toggle = true;
         _CurrentPlayerId = playerId;
+
+        // Debug.Log($"[AntiAfk] Toggling AFK for player {playerId}");
 
         ResetCheckingForAfk();
     }
@@ -157,7 +136,7 @@ public class AntiAfk : MonoBehaviour
 
             if (_PlayerAfkStatus[_CurrentPlayerId] > 0)
             {
-                // Debug.Log($"Player {_CurrentPlayerId} is AFK. {_PlayerAfkStatus[_CurrentPlayerId]} turns left before kick.");
+                Debug.Log($"Player {_CurrentPlayerId} is AFK. {_PlayerAfkStatus[_CurrentPlayerId]} turns left before kick.");
             }
             else
             {
