@@ -4,7 +4,7 @@ using UnityEngine;
 
 public static class Exporter {
 
-    private static readonly string _ExportPath = "anti-afk/ExportedPackages/anti-afk.unitypackage";
+    private static readonly string _ExportPath = "ExportedPackages/anti-afk.unitypackage";
 
     [MenuItem("OMGG/Export Package")] // Allow Unity to call this method from the menu bar
     public static void ExportPackage()

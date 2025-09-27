@@ -77,7 +77,7 @@ if (Test-Path $ReadmeFile) {
 $ExporterFile = "$RootDir\$NewName\Assets\Editor\Exporter.cs"
 
 if (Test-Path $ExporterFile) {
-    (Get-Content $ExporterFile) -replace "$OldName/ExportedPackages/$OldName.unitypackage", "$NewName/ExportedPackages/$NewName.unitypackage" | Set-Content $ExporterFile
+    (Get-Content $ExporterFile) -replace "ExportedPackages/$OldName.unitypackage", "ExportedPackages/$NewName.unitypackage" | Set-Content $ExporterFile
     (Get-Content $ExporterFile) -replace "Assets/OMGG/Package/$OldName", "Assets/OMGG/Package/$NewName" | Set-Content $ExporterFile
 }
 
